@@ -1,0 +1,18 @@
+{
+    "config":
+    {
+        "daemon_path": "",
+        "ffmpeg_path": "",
+        "ffprobe_path": "",
+        "database_dir": "",
+        "config_dir": "",
+        "log_dir": "",
+        "files_dir": "",
+        "files_ext": "",
+        "created_files_dir": "",
+        "reports_dir": "reports",
+        "nb_core_max": 2,
+        "has_vframes": true,
+        "vframes": "7500"
+    }
+}
