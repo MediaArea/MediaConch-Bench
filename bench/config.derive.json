@@ -1,0 +1,103 @@
+{
+    "config":
+    {
+        "daemon_path": "",
+        "ffmpeg_path": "/usr/bin/ffmpeg",
+        "ffprobe_path": "",
+        "script_path": "/tmp/derive",
+        "database_dir": "",
+        "config_dir": "",
+        "log_dir": "",
+        "files_dir": "",
+        "files_ext": "",
+        "created_files_dir": "",
+        "reports_dir": "reports",
+        "nb_core_max": 2,
+        "plugins": [
+            {
+                "id": "ffmpeg1",
+                "name": "PreHook",
+                "bin": "",
+                "analyzeSource": false,
+                "createFile": true,
+                "outputDir": "tmp1",
+                "outputExt": "mp4",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
+                "outputParams": ["--mpeg4"],
+                "params": []
+            },
+            {
+                "id": "ffmpeg1-1",
+                "name": "PreHook",
+                "bin": "",
+                "analyzeSource": false,
+                "createFile": true,
+                "outputDir": "tmp1-1",
+                "outputExt": "mp4",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
+                "outputParams": ["--mpeg4"],
+                "params": []
+            },
+            {
+                "id": "ffmpeg2",
+                "name": "PreHook",
+                "bin": "",
+                "analyzeSource": false,
+                "createFile": true,
+                "outputDir": "tmp2",
+                "outputExt": "mkv",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --ffv1path $OUTPUTFILE $INPUTFILE",
+                "outputParams": ["--ffv1"],
+                "params": []
+            },
+            {
+                "id": "ffmpeg2-1",
+                "name": "PreHook",
+                "bin": "",
+                "analyzeSource": false,
+                "createFile": true,
+                "outputDir": "tmp2-1",
+                "outputExt": "mkv",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --ffv1path $OUTPUTFILE $INPUTFILE",
+                "outputParams": ["--ffv1"],
+                "params": []
+            },
+            {
+                "id": "ffmpeg4",
+                "name": "PreHook",
+                "bin": "",
+                "analyzeSource": false,
+                "createFile": true,
+                "outputDir": "tmp4",
+                "outputExt": "mp4",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
+                "outputParams": ["--mpeg4"],
+                "params": []
+            },
+            {
+                "id": "ffmpeg4-1",
+                "name": "PreHook",
+                "bin": "",
+                "analyzeSource": false,
+                "createFile": true,
+                "outputDir": "",
+                "outputExt": "mp4",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
+                "outputParams": ["--mpeg4"],
+                "params": []
+            },
+            {
+                "id": "logger",
+                "name": "FileLog",
+                "level": "all",
+                "file": ""
+            }
+        ]
+    }
+}

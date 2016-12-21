@@ -456,6 +456,17 @@ def all_files_in_one(lines):
 def launch_daemon():
     return subprocess.Popen([daemon_bin, "-n"])#, stderr=subprocess.PIPE)
 
+def change_ffmpeg_ffprobe_path(input_params):
+    i = 0
+    while i + 1 < len(input_params):
+        if input_params[i] == "--ffmpegpath":
+            i += 1
+            input_params[i] = ffmpeg_bin
+        if input_params[i] == "--ffprobepath":
+            i += 1
+            input_params[i] = ffprobe_bin
+        i += 1
+
 def create_conf(nb):
     configs = []
     config = {}
@@ -481,26 +492,32 @@ def create_conf(nb):
         if "id" in plugin and plugin["id"] == "ffmpeg1":
             plugin["bin"] = script_bin
             plugin["outputDir"] = os.path.join(created_dir, "tmp1")
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
 
         if "id" in plugin and plugin["id"] == "ffmpeg1-1":
             plugin["bin"] = script_bin
             plugin["outputDir"] = os.path.join(created_dir, "tmp1-1")
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
 
         if "id" in plugin and plugin["id"] == "ffmpeg2":
             plugin["bin"] = script_bin
             plugin["outputDir"] = os.path.join(created_dir, "tmp2")
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
 
         if "id" in plugin and plugin["id"] == "ffmpeg2-1":
             plugin["bin"] = script_bin
             plugin["outputDir"] = os.path.join(created_dir, "tmp2-1")
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
 
         if "id" in plugin and plugin["id"] == "ffmpeg4":
             plugin["bin"] = script_bin
             plugin["outputDir"] = os.path.join(created_dir, "tmp4")
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
 
         if "id" in plugin and plugin["id"] == "ffmpeg4-1":
             plugin["bin"] = script_bin
             plugin["outputDir"] = os.path.join(created_dir, "tmp4-1")
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
 
         if "id" in plugin and plugin["id"] == "logger":
             plugin["file"] = log_file
