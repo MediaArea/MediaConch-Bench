@@ -69,6 +69,8 @@ if "ffprobe_path" in config and len(config["ffprobe_path"]) > 0:
 
 if "script_path" in config and len(config["script_path"]) > 0:
     script_bin = config["script_path"]
+else:
+    script_bin = ffmpeg_bin
 
 if "database_dir" in config and len(config["database_dir"]) > 0:
     database = os.path.join(config["database_dir"], "MediaConch.db")
@@ -236,7 +238,7 @@ def create_out_param(files_dir, files, out):
         out_file["time_report"] = 0
         out_file["dst_size"] = 0
         out_file["out_id"] = -1
-        out_file["generated_id"] = -1
+        out_file["generated_id"] = []
         out_file["generated_file"] = ""
         out_file["analyzed"] = False
         out_file["valid"] = False
@@ -324,7 +326,7 @@ def parse_status(out, data):
             if res_k == "ok":
                 for k in res_v:
                     out["analyzed"] = k["finished"]
-                    out["generated_id"] = k.get("generated_id", -1)
+                    out["generated_id"] = k.get("generated_id", [])
 
 def test_status(fval):
     params = create_status_param(fval)
@@ -337,7 +339,7 @@ def test_status(fval):
 def wait_for_all_analyzed(out):
     for f,v in out.items():
         v["analyzed"] = False
-        v["generated_id"] = -1
+        v["generated_id"] = []
 
     is_finish = False
     while not is_finish:
@@ -364,10 +366,10 @@ def get_reports(out):
 
 def get_generated_files(out):
     for f,v in out.items():
-        if out[f].get("generated_id", -1) == -1:
+        if len(out[f].get("generated_id", [])) == 0:
             continue
 
-        params = create_file_from_id(out[f]["generated_id"])
+        params = create_file_from_id(out[f]["generated_id"][0])
         url = create_url("checker_file_from_id")
         req = urllib2.Request(url)
         req.add_header('Content-Type', 'application/json')
@@ -467,6 +469,11 @@ def change_ffmpeg_ffprobe_path(input_params):
             input_params[i] = ffprobe_bin
         i += 1
 
+def change_plugin_output_dir(plugin, directory):
+    if "outputs" in plugin:
+        for out in plugin["outputs"]:
+            out["outputDir"] = directory
+
 def create_conf(nb):
     configs = []
     config = {}
@@ -491,33 +498,33 @@ def create_conf(nb):
     for plugin in plugins:
         if "id" in plugin and plugin["id"] == "ffmpeg1":
             plugin["bin"] = script_bin
-            plugin["outputDir"] = os.path.join(created_dir, "tmp1")
             change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp1"))
 
         if "id" in plugin and plugin["id"] == "ffmpeg1-1":
             plugin["bin"] = script_bin
-            plugin["outputDir"] = os.path.join(created_dir, "tmp1-1")
             change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp1-1"))
 
         if "id" in plugin and plugin["id"] == "ffmpeg2":
             plugin["bin"] = script_bin
-            plugin["outputDir"] = os.path.join(created_dir, "tmp2")
             change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp2"))
 
         if "id" in plugin and plugin["id"] == "ffmpeg2-1":
             plugin["bin"] = script_bin
-            plugin["outputDir"] = os.path.join(created_dir, "tmp2-1")
             change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp2-1"))
 
         if "id" in plugin and plugin["id"] == "ffmpeg4":
             plugin["bin"] = script_bin
-            plugin["outputDir"] = os.path.join(created_dir, "tmp4")
             change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp4"))
 
         if "id" in plugin and plugin["id"] == "ffmpeg4-1":
             plugin["bin"] = script_bin
-            plugin["outputDir"] = os.path.join(created_dir, "tmp4-1")
             change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp4-1"))
 
         if "id" in plugin and plugin["id"] == "logger":
             plugin["file"] = log_file

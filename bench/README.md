@@ -39,8 +39,6 @@ The different steps of the process are:
 * created_files_dir, default set local directory, directory where the transcoded files will be created.
 * reports_dir, default set to reports in the local directory, where the (CSV) report files will be created.
 * nb_core_max, default 2, maximum number of cores to use (Do not use more than the computer have).
-* has_vframes, default set to false, indicates if the number of frames will be a constraint.
-* vframes, default set to 7500, number of frames to transcode.
 * plugins, default no plugins, plugins to use, see below.
 
 ### Plugins
