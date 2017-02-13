@@ -2,9 +2,9 @@
     "config":
     {
         "daemon_path": "",
-        "ffmpeg_path": "",
+        "ffmpeg_path": "/usr/bin/ffmpeg",
         "ffprobe_path": "",
-        "script_path": "",
+        "script_path": "/tmp/derive",
         "database_dir": "",
         "config_dir": "",
         "log_dir": "",
@@ -13,15 +13,13 @@
         "created_files_dir": "",
         "reports_dir": "reports",
         "nb_core_max": 2,
-        "has_vframes": true,
-        "vframes": "7500",
         "plugins": [
             {
                 "id": "ffmpeg1",
                 "name": "PreHook",
                 "bin": "",
-                "inputParams": ["-threads", "1", "-y"],
-                "formatting": "$BIN $INPUTPARAMS -i $INPUTFILE $OUTPUTPARAMS $OUTPUTFILE",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
                 "params": [],
                 "outputs": [
                     {
@@ -29,7 +27,7 @@
                         "createFile": true,
                         "outputDir": "tmp1",
                         "outputExt": "mp4",
-                        "outputParams": ["-c:v", "libx264", "-vframes", "5000"]
+                        "outputParams": ["--mpeg4"]
                     }
                 ]
             },
@@ -37,8 +35,8 @@
                 "id": "ffmpeg1-1",
                 "name": "PreHook",
                 "bin": "",
-                "inputParams": ["-threads", "1", "-y"],
-                "formatting": "$BIN $INPUTPARAMS -i $INPUTFILE $OUTPUTPARAMS $OUTPUTFILE",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
                 "params": [],
                 "outputs": [
                     {
@@ -46,7 +44,7 @@
                         "createFile": true,
                         "outputDir": "tmp1-1",
                         "outputExt": "mp4",
-                        "outputParams": ["-c:v", "libx264", "-vframes", "5000"]
+                        "outputParams": ["--mpeg4"]
                     }
                 ]
             },
@@ -54,8 +52,8 @@
                 "id": "ffmpeg2",
                 "name": "PreHook",
                 "bin": "",
-                "inputParams": ["-threads", "1", "-y"],
-                "formatting": "$BIN $INPUTPARAMS -i $INPUTFILE $OUTPUTPARAMS $OUTPUTFILE",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --ffv1path $OUTPUTFILE $INPUTFILE",
                 "params": [],
                 "outputs": [
                     {
@@ -63,7 +61,7 @@
                         "createFile": true,
                         "outputDir": "tmp2",
                         "outputExt": "mkv",
-                        "outputParams": ["-c:v", "ffv1", "-vframes", "5000"]
+                        "outputParams": ["--ffv1"]
                     }
                 ]
             },
@@ -71,8 +69,8 @@
                 "id": "ffmpeg2-1",
                 "name": "PreHook",
                 "bin": "",
-                "inputParams": ["-threads", "1", "-y"],
-                "formatting": "$BIN $INPUTPARAMS -i $INPUTFILE $OUTPUTPARAMS $OUTPUTFILE",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --ffv1path $OUTPUTFILE $INPUTFILE",
                 "params": [],
                 "outputs": [
                     {
@@ -80,7 +78,7 @@
                         "createFile": true,
                         "outputDir": "tmp2-1",
                         "outputExt": "mkv",
-                        "outputParams": ["-c:v", "ffv1", "-vframes", "5000"]
+                        "outputParams": ["--ffv1"]
                     }
                 ]
             },
@@ -88,8 +86,8 @@
                 "id": "ffmpeg4",
                 "name": "PreHook",
                 "bin": "",
-                "inputParams": ["-threads", "1", "-y"],
-                "formatting": "$BIN $INPUTPARAMS -i $INPUTFILE $OUTPUTPARAMS $OUTPUTFILE",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
                 "params": [],
                 "outputs": [
                     {
@@ -97,7 +95,7 @@
                         "createFile": true,
                         "outputDir": "tmp4",
                         "outputExt": "mp4",
-                        "outputParams": ["-c:v", "libx264"]
+                        "outputParams": ["--mpeg4"]
                     }
                 ]
             },
@@ -105,8 +103,8 @@
                 "id": "ffmpeg4-1",
                 "name": "PreHook",
                 "bin": "",
-                "inputParams": ["-threads", "1", "-y"],
-                "formatting": "$BIN $INPUTPARAMS -i $INPUTFILE $OUTPUTPARAMS $OUTPUTFILE",
+                "inputParams": ["--ffmpegpath", "", "--ffprobepath", "", "--inputoptions", "-threads 1 -y"],
+                "formatting": "$BIN $INPUTPARAMS $OUTPUTPARAMS --mpeg4path $OUTPUTFILE $INPUTFILE",
                 "params": [],
                 "outputs": [
                     {
@@ -114,7 +112,7 @@
                         "createFile": true,
                         "outputDir": "tmp4-1",
                         "outputExt": "mp4",
-                        "outputParams": ["-c:v", "libx264"]
+                        "outputParams": ["--mpeg4"]
                     }
                 ]
             },

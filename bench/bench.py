@@ -37,6 +37,7 @@ home_dir = ""
 daemon_bin = ""
 ffmpeg_bin = "ffmpeg"
 ffprobe_bin = "ffprobe"
+script_bin = ""
 database = ""
 conf_file = ""
 log_file = ""
@@ -47,6 +48,10 @@ reports_dir = ""
 max_core = 32
 has_vframes=False
 vframes = "100"
+api_version = "1.13"
+plugins = []
+if "plugins" in config and len(config["plugins"]) > 0:
+    plugins = config["plugins"]
 
 if "daemon_path" in config and len(config["daemon_path"]) > 0:
     daemon_bin = config["daemon_path"]
@@ -61,6 +66,11 @@ if "ffmpeg_path" in config and len(config["ffmpeg_path"]) > 0:
 
 if "ffprobe_path" in config and len(config["ffprobe_path"]) > 0:
     ffprobe_bin = config["ffprobe_path"]
+
+if "script_path" in config and len(config["script_path"]) > 0:
+    script_bin = config["script_path"]
+else:
+    script_bin = ffmpeg_bin
 
 if "database_dir" in config and len(config["database_dir"]) > 0:
     database = os.path.join(config["database_dir"], "MediaConch.db")
@@ -88,7 +98,7 @@ else:
         conf_file = os.path.join(home_dir, ".config", "MediaConch.rc")
 
 if "log_dir" in config and len(config["log_dir"]) > 0:
-    log_file = os.path.join(config["config_dir"], "MediaConch.log")
+    log_file = os.path.join(config["log_dir"], "MediaConch.log")
 else:
     log_file = os.path.join(os.getcwd(), "mediaconch.log")
 
@@ -122,6 +132,9 @@ if "has_vframes" in config and config["has_vframes"] >=1:
 
 if "vframes" in config and len(config["vframes"]):
     vframes = config["vframes"]
+
+if "api_version" in config and len(config["api_version"]):
+    api_version = config["api_version"]
 
 plugins_step1 = []
 plugins_step1.append("ffmpeg1")
@@ -203,7 +216,7 @@ def get_last_timestamp(lines, filename=None):
     sys.exit(1)
 
 def create_url(command):
-    return "http://localhost:4242/1.12/" + command
+    return "http://localhost:4242/" + api_version + "/" + command
 
 def get_file_duration(filename):
     p = subprocess.Popen([ffprobe_bin, "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -225,7 +238,7 @@ def create_out_param(files_dir, files, out):
         out_file["time_report"] = 0
         out_file["dst_size"] = 0
         out_file["out_id"] = -1
-        out_file["generated_id"] = -1
+        out_file["generated_id"] = []
         out_file["generated_file"] = ""
         out_file["analyzed"] = False
         out_file["valid"] = False
@@ -313,7 +326,7 @@ def parse_status(out, data):
             if res_k == "ok":
                 for k in res_v:
                     out["analyzed"] = k["finished"]
-                    out["generated_id"] = k.get("generated_id", -1)
+                    out["generated_id"] = k.get("generated_id", [])
 
 def test_status(fval):
     params = create_status_param(fval)
@@ -326,7 +339,7 @@ def test_status(fval):
 def wait_for_all_analyzed(out):
     for f,v in out.items():
         v["analyzed"] = False
-        v["generated_id"] = -1
+        v["generated_id"] = []
 
     is_finish = False
     while not is_finish:
@@ -353,10 +366,10 @@ def get_reports(out):
 
 def get_generated_files(out):
     for f,v in out.items():
-        if out[f].get("generated_id", -1) == -1:
+        if len(out[f].get("generated_id", [])) == 0:
             continue
 
-        params = create_file_from_id(out[f]["generated_id"])
+        params = create_file_from_id(out[f]["generated_id"][0])
         url = create_url("checker_file_from_id")
         req = urllib2.Request(url)
         req.add_header('Content-Type', 'application/json')
@@ -445,6 +458,22 @@ def all_files_in_one(lines):
 def launch_daemon():
     return subprocess.Popen([daemon_bin, "-n"])#, stderr=subprocess.PIPE)
 
+def change_ffmpeg_ffprobe_path(input_params):
+    i = 0
+    while i + 1 < len(input_params):
+        if input_params[i] == "--ffmpegpath":
+            i += 1
+            input_params[i] = ffmpeg_bin
+        if input_params[i] == "--ffprobepath":
+            i += 1
+            input_params[i] = ffprobe_bin
+        i += 1
+
+def change_plugin_output_dir(plugin, directory):
+    if "outputs" in plugin:
+        for out in plugin["outputs"]:
+            out["outputDir"] = directory
+
 def create_conf(nb):
     configs = []
     config = {}
@@ -464,159 +493,45 @@ def create_conf(nb):
     configs.append(config)
 
     config = {}
-    plugins = []
-    p = {}
-    p["id"] = "ffmpeg1"
-    p["name"] = "FFmpeg"
-    p["bin"] = ffmpeg_bin
-    p["analyzeSource"] = False
-    p["createFile"] = True
-    p["outputDir"] = os.path.join(created_dir, "tmp1")
-    p["outputExt"] = "mp4"
-    p["inputParams"] = ["-y", "-threads", "1"]
-    p_a = []
-    p_a.append("-vcodec")
-    p_a.append("mpeg4")
-    p_a.append("-acodec")
-    p_a.append("aac")
-    p_a.append("-v")
-    p_a.append("fatal")
 
-    if has_vframes:
-        p_a.append("-vframes")
-        p_a.append(vframes)
+    copy = []
+    for plugin in plugins:
+        if "id" in plugin and plugin["id"] == "ffmpeg1":
+            plugin["bin"] = script_bin
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp1"))
 
-    p["outputParams"] = p_a
-    p["params"] = []
-    plugins.append(p)
+        if "id" in plugin and plugin["id"] == "ffmpeg1-1":
+            plugin["bin"] = script_bin
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp1-1"))
 
+        if "id" in plugin and plugin["id"] == "ffmpeg2":
+            plugin["bin"] = script_bin
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp2"))
 
-    p = {}
-    p["id"] = "ffmpeg1-1"
-    p["name"] = "FFmpeg"
-    p["bin"] = ffmpeg_bin
-    p["analyzeSource"] = False
-    p["createFile"] = True
-    p["outputDir"] = os.path.join(created_dir, "tmp1-1")
-    p["outputExt"] = "mp4"
-    p["inputParams"] = ["-y", "-threads", "1"]
-    p_a = []
-    p_a.append("-vcodec")
-    p_a.append("mpeg4")
-    p_a.append("-acodec")
-    p_a.append("aac")
-    p_a.append("-v")
-    p_a.append("fatal")
+        if "id" in plugin and plugin["id"] == "ffmpeg2-1":
+            plugin["bin"] = script_bin
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp2-1"))
 
-    if has_vframes:
-        p_a.append("-vframes")
-        p_a.append(vframes)
+        if "id" in plugin and plugin["id"] == "ffmpeg4":
+            plugin["bin"] = script_bin
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp4"))
 
-    p["outputParams"] = p_a
-    p["params"] = []
-    plugins.append(p)
+        if "id" in plugin and plugin["id"] == "ffmpeg4-1":
+            plugin["bin"] = script_bin
+            change_ffmpeg_ffprobe_path(plugin["inputParams"])
+            change_plugin_output_dir(plugin, os.path.join(created_dir, "tmp4-1"))
 
-    p = {}
-    p["id"] = "ffmpeg2"
-    p["name"] = "FFmpeg"
-    p["bin"] = ffmpeg_bin
-    p["analyzeSource"] = False
-    p["createFile"] = True
-    p["outputDir"] = os.path.join(created_dir, "tmp2")
-    p["outputExt"] = "mkv"
-    p["inputParams"] = ["-y", "-threads", "1"]
-    p_a = []
-    p_a.append("-vcodec")
-    p_a.append("ffv1")
-    p_a.append("-level")
-    p_a.append("3")
-    p_a.append("-acodec")
-    p_a.append("copy")
-    p_a.append("-v")
-    p_a.append("fatal")
+        if "id" in plugin and plugin["id"] == "logger":
+            plugin["file"] = log_file
 
-    if has_vframes:
-        p_a.append("-vframes")
-        p_a.append(vframes)
+        copy.append(plugin)
 
-    p["outputParams"] = p_a
-    p["params"] = []
-    plugins.append(p)
-
-    p = {}
-    p["id"] = "ffmpeg2-1"
-    p["name"] = "FFmpeg"
-    p["bin"] = ffmpeg_bin
-    p["analyzeSource"] = False
-    p["createFile"] = True
-    p["outputDir"] = os.path.join(created_dir, "tmp2-1")
-    p["outputExt"] = "mkv"
-    p["inputParams"] = ["-y", "-threads", "1"]
-    p_a = []
-    p_a.append("-vcodec")
-    p_a.append("ffv1")
-    p_a.append("-level")
-    p_a.append("3")
-    p_a.append("-acodec")
-    p_a.append("copy")
-    p_a.append("-v")
-    p_a.append("fatal")
-
-    if has_vframes:
-        p_a.append("-vframes")
-        p_a.append(vframes)
-
-    p["outputParams"] = p_a
-    p["params"] = []
-    plugins.append(p)
-
-    p = {}
-    p["id"] = "ffmpeg4"
-    p["name"] = "FFmpeg"
-    p["bin"] = ffmpeg_bin
-    p["analyzeSource"] = False
-    p["createFile"] = True
-    p["outputDir"] = os.path.join(created_dir, "tmp4")
-    p["outputExt"] = "mp4"
-    p["inputParams"] = ["-y", "-threads", "1"]
-    p_a = []
-    p_a.append("-vcodec")
-    p_a.append("mpeg4")
-    p_a.append("-acodec")
-    p_a.append("aac")
-    p_a.append("-v")
-    p_a.append("fatal")
-    p["outputParams"] = p_a
-    p["params"] = []
-    plugins.append(p)
-
-    p = {}
-    p["id"] = "ffmpeg4-1"
-    p["name"] = "FFmpeg"
-    p["bin"] = ffmpeg_bin
-    p["analyzeSource"] = False
-    p["createFile"] = True
-    p["outputDir"] = os.path.join(created_dir, "tmp4-1")
-    p["outputExt"] = "mp4"
-    p["inputParams"] = ["-y", "-threads", "1"]
-    p_a = []
-    p_a.append("-vcodec")
-    p_a.append("mpeg4")
-    p_a.append("-acodec")
-    p_a.append("aac")
-    p_a.append("-v")
-    p_a.append("fatal")
-    p["outputParams"] = p_a
-    p["params"] = []
-    plugins.append(p)
-
-    p = {}
-    p["id"] = "logger"
-    p["name"] = "FileLog"
-    p["level"] = "all"
-    p["file"] = log_file
-    plugins.append(p)
-    config["Plugins"] = plugins
+    config["Plugins"] = copy
     configs.append(config)
 
     with open(conf_file, "w") as f:
